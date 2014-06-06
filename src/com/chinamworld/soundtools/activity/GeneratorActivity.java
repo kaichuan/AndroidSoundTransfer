@@ -5,7 +5,6 @@ import java.util.Arrays;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -14,19 +13,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Switch;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
 
 import com.chinamworld.soundtools.R;
-import com.chinamworld.soundtools.process.Common;
 import com.chinamworld.soundtools.process.Generator;
 
 public class GeneratorActivity extends Activity {
-	private static TableLayout spectrumTable;
-	private static Switch[] freqSwitches = new Switch[Common.FREQUENCY_TO_WATCH];
+//	private static TableLayout spectrumTable;
+//	private static Switch[] freqSwitches = new Switch[Common.FREQUENCY_TO_WATCH];
 	private Generator generator;
-	private MediaPlayer mediaPlayer;
+//	private MediaPlayer mediaPlayer;
 	public void toggleSwitch(View view) {
 		if (((Switch) view).isChecked()) {
 			if (generator == null || generator.isCancelled()){
@@ -98,18 +93,18 @@ public class GeneratorActivity extends Activity {
 				Bundle savedInstanceState) {
 			View rootView = inflater.inflate(R.layout.fragment_generator,
 					container, false);
-			spectrumTable = (TableLayout) rootView.findViewById(R.id.spectrumTable);
-			TextView freqText;
-			TableRow row;
-			for (int i = 0; i < Common.FREQUENCY_TO_WATCH; i++) {
-		        row = new TableRow(getActivity());
-		        freqText = new TextView(getActivity());
-		        freqSwitches[i] = new Switch(getActivity());
-		        freqText.setText(String.valueOf(Common.frequencys[i]));
-		        row.addView(freqText);
-		        row.addView(freqSwitches[i]);
-		        spectrumTable.addView(row,i+1);
-		    }
+//			spectrumTable = (TableLayout) rootView.findViewById(R.id.spectrumTable);
+//			TextView freqText;
+//			TableRow row;
+//			for (int i = 0; i < Common.FREQUENCY_TO_WATCH; i++) {
+//		        row = new TableRow(getActivity());
+//		        freqText = new TextView(getActivity());
+//		        freqSwitches[i] = new Switch(getActivity());
+//		        freqText.setText(String.valueOf(Common.frequencys[i]));
+//		        row.addView(freqText);
+//		        row.addView(freqSwitches[i]);
+//		        spectrumTable.addView(row,i+1);
+//		    }
 			return rootView;
 		}
 	}
