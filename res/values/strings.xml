@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">SoundTools</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
-    <string name="title_activity_generator">GeneratorActivity</string>
-    <string name="title_activity_receiver">ReceiverActivity</string>
+    <string name="app_name">声波传输原型</string>
+    <string name="action_settings">设置</string>
+    <string name="title_activity_generator">声波发送</string>
+    <string name="title_activity_receiver">声波接收</string>
+    <string name="generator_btn">发送声波</string>
+    <string name="receiver_btn">接收声波</string>
+    <string name="play_btn">发声开关</string>
+    <string name="frequency">频率</string>
+    <string name="energy">音量</string>
+    <string name="receive_btn">接收开关</string>
 
 </resources>

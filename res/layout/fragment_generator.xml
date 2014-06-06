@@ -7,6 +7,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin" >
 
+    
     <EditText
         android:id="@+id/phoneNumber"
         android:layout_width="match_parent"
@@ -14,7 +15,7 @@
         android:ems="10"
         android:inputType="phone" >
 
-        <requestFocus />
+      
     </EditText>
 
     <Switch
@@ -22,35 +23,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="toggleSwitch"
-        android:text="Play" />
+        android:text="@string/play_btn" />
     
-     <TableLayout
-        android:id="@+id/spectrumTable"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:stretchColumns="0,1" >
-
-        <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-            <TextView
-                android:id="@+id/textView1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Frequency"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/textView2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Active"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textStyle="bold" />
-        </TableRow>
-    </TableLayout>
+     
     
 
 </LinearLayout>

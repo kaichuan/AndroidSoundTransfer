@@ -15,13 +15,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="launchGenerator"
-        android:text="Generator" />
+        android:text="@string/generator_btn" />
 
     <Button
         android:id="@+id/btnReceiver"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="launchReceiver"
-        android:text="Receiver" />
+        android:text="@string/receiver_btn" />
 
 </LinearLayout>
