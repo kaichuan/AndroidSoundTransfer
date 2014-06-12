@@ -6,6 +6,7 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder.AudioSource;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.chinamworld.soundtools.activity.ReceiverActivity;
 
@@ -28,7 +29,8 @@ public class Receiver extends AsyncTask<Integer, Double, Long> {
 		int minBufferSize = AudioRecord.getMinBufferSize(Common.SAMPLE_RATE,
 				AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		// marker that separate each transmitting data
-		final byte[] marker = new byte[] { 2, 2, 0, 0 };
+		final byte marker = 10;
+		byte runMarker = 0;
 		// codeIndex is the code that represent by each 10ms sound wave
 		byte codeIndex = 0;
 		// byteIndex is the index of the transmitting data byte
@@ -36,12 +38,14 @@ public class Receiver extends AsyncTask<Integer, Double, Long> {
 		// if isDecording mean the queue is start decoding the data
 		boolean isDecording = false;
 		// indicate if the queue is synchronized
-//		boolean isSync = false;
+		boolean isSync = false;
 
 		byte[] result = new byte[5];
 		byte[] resultForLong = new byte[8];
 		
 		long resultNumber, preGet = 0;
+		
+//		int index = 0; 
 
 		
 
@@ -63,62 +67,14 @@ public class Receiver extends AsyncTask<Integer, Double, Long> {
 		for (int i = 0; i < result.length; i++)
 			result[i] = 0;
 		audioRecord.startRecording();
-		// whether use offset buffer
-
 		int indexMax = 0;
 		double energyMax = 0;
-		
-		int failCount = 0;
+		double energySec = 0;
 		int offSet = 0;
 		
-//		int deltaMax = 0;
-//		int syncOffset = 0;
-//		final int syncDelta = 41;
 
 		while (!isCancelled()) {
-			
-			// start sync with the queue
-//			if (!isSync) {
-//				short[] syncBuffer = new short[Common.FFT_SIZE * 2];
-//				readByteCount = audioRecord.read(syncBuffer, 0, syncBuffer.length);
-//				energyMax = 0;
-//				syncOffset = 0;
-//				startTime = System.currentTimeMillis();
-//				for (int i = 0; i < 10; i++){
-//					syncOffset = syncDelta * i;
-//					buffer = Arrays.copyOfRange(syncBuffer, syncOffset, syncOffset+Common.FFT_SIZE);
-//					for (int j = 0; j < buffer.length; j++) {
-//						source[2 * j] = buffer[j];
-//						source[2 * j + 1] = 0;
-//					}
-//					fft.complexForward(source);
-//					for (int k = 0; k < Common.FREQUENCY_TO_WATCH; k++) {
-//						energys[k] = Math
-//								.sqrt(Math.pow(
-//										source[Common.targetBins[k] * 2], 2)
-//										+ Math.pow(
-//												source[Common.targetBins[k] * 2 + 1],
-//												2));
-//						if (energys[k] > energyMax) {
-//							energyMax = energys[k];
-//							indexMax = k;
-//							deltaMax = i;
-//						}
-//						if (energyMax < 10000){
-////							Log.i("ttt", "energy:" + energyMax);
-//							continue line;
-//						}
-//					}
-//				}
-//				endTime = System.currentTimeMillis();
-//				Log.i("ttt", "Stime:" + (endTime - startTime) + " offset:" + deltaMax);
-//				
-//				
-//				
-//				
-//			} else {
 				readByteCount = audioRecord.read(buffer, 0, Common.FFT_SIZE);
-				
 				if (readByteCount == Common.FFT_SIZE) {
 					for (int i = 0; i< buffer.length - offSet; i++) {
 						source[2 * i] = offsetBuffer[i];
@@ -132,15 +88,8 @@ public class Receiver extends AsyncTask<Integer, Double, Long> {
 						offsetBuffer[i] = buffer[i+offSet];
 					}
 					
-					
-//					startTime = System.currentTimeMillis();
 					fft.complexForward(source);
-//					endTime = System.currentTimeMillis();
-
-//					if (!isDecording) {
-//						Log.i("ttt", "" + (endTime - startTime));
-//					}
-
+					energySec = 0;
 					energyMax = 0;
 					for (int i = 0; i < Common.FREQUENCY_TO_WATCH; i++) {
 						energys[i] = Math
@@ -150,37 +99,52 @@ public class Receiver extends AsyncTask<Integer, Double, Long> {
 												source[Common.targetBins[i] * 2 + 1],
 												2));
 						if (energys[i] > energyMax) {
+							energySec = energyMax;
 							energyMax = energys[i];
 							indexMax = i;
+						} else if (energys[i] > energySec){
+							energySec = energys[i];
 						}
 					}
+					this.publishProgress(energys);
+					if (energyMax < 5000){
+						byteIndex = 0;
+						codeIndex = 0;
+						isDecording = false;
+						continue;
+					}
+//					Log.i("xxx", energyMax + ":" + energySec);
+					
+					if (energyMax / energySec < 2){
+						offSet += 44;
+						offSet = offSet % Common.FFT_SIZE;
+						byteIndex = 0;
+						codeIndex = 0;
+						isDecording = false;
+						continue;
+					}
+//					Log.i("xxx", "synced");
+					
+					
 					if (!isDecording) {
-						if (energyMax < 8000)
-							continue;
-						if (indexMax == marker[codeIndex]) {
-							codeIndex++;
-						} else {
-							codeIndex = 0;
-							failCount ++;
-						}
-						if (failCount == 44){
-							failCount = 0;
-							offSet += Common.FFT_SIZE/11;
-							offSet = offSet % Common.FFT_SIZE;
-							continue;
-						}
-						if (codeIndex == marker.length) {
+//						Log.i("xxx", "runMaker: " + runMarker);
+						runMarker = (byte)(runMarker << 2 | indexMax); 
+//						if (indexMax == marker[codeIndex]) {
+//							codeIndex++;
+//						} else {
+//							codeIndex = 0;
+//							continue;
+//						}
+						if (runMarker == marker) {
 							isDecording = true;
 							codeIndex = 0;
 							continue;
 						}
 					}
 					if (isDecording) {
-						if (energyMax < 8000) {
-							isDecording = false;
-							continue;
-						}
-						result[byteIndex] = (byte) ((indexMax << 2 * codeIndex) | result[byteIndex]);
+						Log.i("xxx", "data: " + indexMax + " index: " );
+						
+						result[byteIndex] = (byte) ((indexMax << 2 * (3-codeIndex)) | result[byteIndex]);
 						codeIndex++;
 						if (codeIndex == 4) {
 							byteIndex++;
@@ -199,16 +163,21 @@ public class Receiver extends AsyncTask<Integer, Double, Long> {
 							ByteBuffer bb = ByteBuffer.wrap(resultForLong);
 							resultNumber = bb.getLong();
 
-							 if (resultNumber == preGet) {
-							 audioRecord.stop();
-							 return resultNumber;
-							 } else
-							 preGet = resultNumber;
-//							audioRecord.stop();
-//							return resultNumber;
+//							 if (resultNumber == preGet) {
+//							 audioRecord.stop();
+//							 return resultNumber;
+//							 } else
+//							 preGet = resultNumber;
+//							
+							audioRecord.stop();
+							return resultNumber;
 						}
 					}
-					this.publishProgress(energys);
+					
+				}
+				else {
+					audioRecord.stop();
+					 return (long)1;
 				}
 //			}
 		}

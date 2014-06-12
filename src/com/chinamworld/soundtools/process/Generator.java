@@ -9,19 +9,19 @@ import android.os.AsyncTask;
 
 public class Generator extends AsyncTask<Integer, Void, Void> {
 	public static final byte marker = 10;
-	public static final byte escaper = 88;
+	public static final byte escaper = 11;
 	private AudioTrack track;
 	private byte[] source;
 	public Generator(byte[] source){
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		baos.write(marker);
 		for (byte i : source){
-			if (i == marker){
-				baos.write(escaper);
-			}
-			if (i == escaper){
-				baos.write(escaper);
-			}
+//			if (i == marker){
+//				baos.write(escaper);
+//			}
+//			if (i == escaper){
+//				baos.write(escaper);
+//			}
 			baos.write(i);
 		}
 		this.source = baos.toByteArray();
@@ -58,7 +58,7 @@ public class Generator extends AsyncTask<Integer, Void, Void> {
 			for (int i=0; i < source.length; i++){
 				for (int j = 0; j<4;){
 //					buffer[bufferIndex] = samples[3][sampleIndex];
-					buffer[bufferIndex] = samples[source[i]>>>j*2&3][sampleIndex];
+					buffer[bufferIndex] = samples[source[i]>>>(3-j)*2&3][sampleIndex];
 					bufferIndex++;
 					sampleIndex++;
 					if (sampleIndex >= sampleCount){
@@ -94,7 +94,11 @@ public class Generator extends AsyncTask<Integer, Void, Void> {
 
 	@Override
 	protected void onCancelled(Void aVoid) {
-
+		if (this.track != null){
+			this.track.flush();
+			this.track.stop();
+		}
+		
 	}
 
 	@Override
